@@ -29,14 +29,20 @@ import { BRAND_BAND } from '../../utilities/constants';
  */
 class BrandBand extends React.Component {
 	static injectLightningBlueStyles() {
+		/* eslint-disable react/no-danger */
 		return (
-			<style>{`.slds-brand-band.dsr-brand-band_lightning-blue:before {
+			<style
+				dangerouslySetInnerHTML={{
+					__html: `.slds-brand-band.dsr-brand-band_lightning-blue:before {
 	background-image: url(/assets/images/themes/oneSalesforce/banner-brand-default.png), linear-gradient(to top, rgba(175, 197, 222, 0) 0, #1B5F9E);
 }
 .slds-brand-band.dsr-brand-band_lightning-blue:after {
 	background-image: linear-gradient(to bottom, rgba(175, 197, 222, 0) 60%, #AFC5DE);
-}`}</style>
+}`,
+				}}
+			/>
 		);
+		/* eslint-enable react/no-danger */
 	}
 
 	constructor(props) {
@@ -65,6 +71,8 @@ class BrandBand extends React.Component {
 					...props.styleContainer,
 				}}
 			>
+				{props.theme === 'lightning-blue' &&
+					BrandBand.injectLightningBlueStyles()}
 				<div
 					className={classNames(
 						'slds-brand-band',
@@ -82,8 +90,6 @@ class BrandBand extends React.Component {
 					id={this.getId()}
 					style={props.style}
 				>
-					{props.theme === 'lightning-blue' &&
-						BrandBand.injectLightningBlueStyles()}
 					{props.children}
 				</div>
 			</div>
