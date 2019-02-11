@@ -28,30 +28,69 @@ import { BRAND_BAND } from '../../utilities/constants';
  * The brand band provides theming capability that adds personality and improves information density and contrast.
  */
 class BrandBand extends React.Component {
-	static injectLightningBlueStyles() {
-		/* eslint-disable react/no-danger */
-		return (
-			<style
-				dangerouslySetInnerHTML={{
-					__html: `.slds-brand-band.dsr-brand-band_lightning-blue:before {
+	static getLightningBlueStyles(repaintNumber) {
+		return `.slds-brand-band.dsr-brand-band_lightning-blue_${repaintNumber}:before {
 	background-image: url(/assets/images/themes/oneSalesforce/banner-brand-default.png), linear-gradient(to top, rgba(175, 197, 222, 0) 0, #1B5F9E);
 }
-.slds-brand-band.dsr-brand-band_lightning-blue:after {
+.slds-brand-band.dsr-brand-band_lightning-blue_${repaintNumber}:after {
 	background-image: linear-gradient(to bottom, rgba(175, 197, 222, 0) 60%, #AFC5DE);
-}`,
-				}}
-			/>
-		);
-		/* eslint-enable react/no-danger */
+}`;
 	}
 
 	constructor(props) {
 		super(props);
+
 		this.generatedId = shortid.generate();
+		this.state = {
+			hasRepaintedTheme: false,
+		};
+		this.styleTag = null;
+
+		if (this.props.theme === 'lightning-blue') {
+			this.injectLightningBlueStyles(0);
+		}
+	}
+
+	componentDidMount() {
+		if (
+			!this.state.hasRepaintedTheme &&
+			this.props.theme === 'lightning-blue' &&
+			this.styleTag
+		) {
+			this.styleTag.innerHTML = BrandBand.getLightningBlueStyles(1);
+			this.setState({ hasRepaintedTheme: true }); // eslint-disable-line react/no-did-mount-set-state
+		}
+	}
+
+	componentWillUnmount() {
+		if (this.styleTag) {
+			this.styleTag.parentElement.removeChild(this.styleTag);
+		}
 	}
 
 	getId() {
 		return this.props.id || this.generatedId;
+	}
+
+	injectLightningBlueStyles() {
+		const styleTag = document.createElement('style');
+		let styleInjectionTarget;
+
+		if (typeof this.props.styleInjectionTarget === 'string') {
+			styleInjectionTarget = document.querySelector(
+				this.props.styleInjectionTarget
+			);
+		} else {
+			styleInjectionTarget = this.props.styleInjectionTarget;
+		}
+
+		if (styleInjectionTarget) {
+			styleTag.innerHTML = BrandBand.getLightningBlueStyles();
+			styleTag.type = 'text/css';
+
+			styleInjectionTarget.append(styleTag);
+			this.styleTag = styleTag;
+		}
 	}
 
 	render() {
@@ -71,8 +110,6 @@ class BrandBand extends React.Component {
 					...props.styleContainer,
 				}}
 			>
-				{props.theme === 'lightning-blue' &&
-					BrandBand.injectLightningBlueStyles()}
 				<div
 					className={classNames(
 						'slds-brand-band',
@@ -83,7 +120,10 @@ class BrandBand extends React.Component {
 
 							'slds-brand-band_none': props.image === 'none',
 
-							'dsr-brand-band_lightning-blue': props.theme === 'lightning-blue',
+							[`dsr-brand-band_lightning-blue_${
+								this.state.hasRepaintedTheme ? 1 : 0
+							}`]:
+								props.theme === 'lightning-blue',
 						},
 						props.className
 					)}
@@ -140,6 +180,14 @@ BrandBand.propTypes = {
 	styleContainer: PropTypes.object,
 
 	/**
+	 * Specifies the target element for style injection if lightning-blue theme is used. Can be a string selector or the actual element itself. Default is 'head'
+	 */
+	styleInjectionTarget: PropTypes.oneOfType([
+		PropTypes.string,
+		PropTypes.instanceOf(Element),
+	]),
+
+	/**
 	 * Different brand band styling
 	 */
 	theme: PropTypes.oneOf(['default', 'lightning-blue']),
@@ -148,6 +196,7 @@ BrandBand.propTypes = {
 BrandBand.defaultProps = {
 	image: 'default',
 	size: 'medium',
+	styleInjectionTarget: 'head',
 	theme: 'default',
 };
 
