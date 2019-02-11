@@ -47,7 +47,7 @@ class BrandBand extends React.Component {
 		this.styleTag = null;
 
 		if (this.props.theme === 'lightning-blue') {
-			this.injectLightningBlueStyles(0);
+			this.injectLightningBlueStyles();
 		}
 	}
 
@@ -85,7 +85,7 @@ class BrandBand extends React.Component {
 		}
 
 		if (styleInjectionTarget) {
-			styleTag.innerHTML = BrandBand.getLightningBlueStyles();
+			styleTag.innerHTML = BrandBand.getLightningBlueStyles(0);
 			styleTag.type = 'text/css';
 
 			styleInjectionTarget.append(styleTag);
